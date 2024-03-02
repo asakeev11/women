@@ -27,5 +27,5 @@
 {% if post.photo %}
 <p><img class="img-article-left" src="{{post.photo.url}}"></p>
 {% endif %}
-{{post.content|linebreaks}}
+<i>{{post.content|linebreaks}}</i>
 {% endblock %}

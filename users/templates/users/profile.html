@@ -18,9 +18,14 @@
     {% endfor %}
 
     <p><button type="submit">Сохранить</button></p>
+    {% if perms.users.delete_user %}
+    <p><a href="{% url 'admin:index' %}">Admin Panel</a></p>
+    {% endif %}
 </form>
 
+{% if not perms.users.social_auth %}
 <hr>
 <p><a href="{% url 'users:password_change' %}">Сменить пароль</a></p>
+{% endif %}
 
 {% endblock %}

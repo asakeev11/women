@@ -8,8 +8,9 @@ from django.views import View
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, DetailView, FormView, CreateView, UpdateView
 from django.core.paginator import Paginator
+from django.core.cache import cache
 
-from .forms import AddPostForm, UploadFileForm
+from .forms import AddPostForm, UploadFileForm, ContactForm
 from .models import Women, Category, TagPost, UploadFiles
 from .utils import DataMixin
 
@@ -21,7 +22,12 @@ class WomenHome(DataMixin, ListView):
     category_selected = 0
 
     def get_queryset(self):
-        return Women.published.all().select_related('category')
+        w_list = cache.get('women_posts')
+        if not w_list:
+            w_list = Women.published.all().select_related('category')
+            cache.set('women_posts', w_list, 60)
+        return w_list
+
 
 # def handle_uploaded_file(f):
 #     with open(f"uploads/{f.name}", "wb+") as destination:
@@ -38,7 +44,7 @@ def about(request):
                                                 'page_obj': page_obj})
 
 
-class ShowPOst(LoginRequiredMixin, DataMixin, DetailView):
+class ShowPOst(DataMixin, DetailView):
     template_name = 'women/post.html'
     slug_url_kwarg = 'post_slug'
     context_object_name = 'post'
@@ -72,13 +78,15 @@ class UpdatePage(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     permission_required = 'women.change_women'
 
 
-@permission_required(perm='women.view_women', raise_exception=True)
-def contact(request):
-    return render(request, 'women/index.html', {'title': 'Обратная связь'})
+class ContactFormView(LoginRequiredMixin, DataMixin, FormView):
+    form_class = ContactForm
+    template_name = 'women/contact.html'
+    success_url = reverse_lazy('home')
+    title_page = 'Обратная связь'
 
-
-# def login(request):
-#     return HttpResponse('Логин')
+    def form_valid(self, form):
+        print(form.cleaned_data)
+        return super().form_valid(form)
 
 
 def page_not_found(request, exception):

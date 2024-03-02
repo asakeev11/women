@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from .models import Women, Category
+from .models import Women, Category, TagPost, Husband
 from django.utils.safestring import mark_safe
 
 
@@ -57,3 +57,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     list_display_links = ('id', 'name')
     ordering = ['id']
+
+
+admin.site.register(TagPost)
+admin.site.register(Husband)
